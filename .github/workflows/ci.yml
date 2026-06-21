@@ -1,0 +1,156 @@
+name: EntreSkill Hub — CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 1 — Server: Lint, Unit Tests, Integration Tests
+  # ────────────────────────────────────────────────────────────────────────────
+  server-test:
+    name: 🧪 Server Tests
+    runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:7.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")'"
+          --health-interval 30s
+          --health-timeout 10s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: server
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit & integration tests
+        env:
+          NODE_ENV: test
+          MONGO_URI: mongodb://localhost:27017/entreskill_test
+          JWT_SECRET: ci-test-jwt-secret
+          JWT_REFRESH_SECRET: ci-test-refresh-secret
+          LOG_LEVEL: silent
+        run: npm test -- --forceExit --coverage
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: server-coverage
+          path: server/coverage/
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 2 — Client: Lint, Unit Tests, Production Build
+  # ────────────────────────────────────────────────────────────────────────────
+  client-build:
+    name: 🏗️ Client Build
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: client
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build production bundle
+        env:
+          VITE_API_URL: /api
+        run: npm run build
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-dist
+          path: client/dist/
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 3 — Docker Build & Push (only on push to main)
+  # ────────────────────────────────────────────────────────────────────────────
+  docker-push:
+    name: 🐳 Docker Build & Push
+    runs-on: ubuntu-latest
+    needs: [server-test, client-build]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU (multi-platform builds)
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Build and push server image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./server
+          file: ./server/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/entreskill-server:latest
+            ${{ secrets.DOCKER_USERNAME }}/entreskill-server:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push client image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./client
+          file: ./client/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/entreskill-client:latest
+            ${{ secrets.DOCKER_USERNAME }}/entreskill-client:${{ github.sha }}
+          build-args: VITE_API_URL=/api
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Post build summary
+        run: |
+          echo "## ✅ Docker images pushed" >> $GITHUB_STEP_SUMMARY
+          echo "- \`entreskill-server:${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`entreskill-client:${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
