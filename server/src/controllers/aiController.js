@@ -1,5 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const AiService = require('../services/aiService');
+const ContextService = require('../services/contextService');
 const ChatSession = require('../models/ChatSession');
 const ChatMessage = require('../models/ChatMessage');
 const { objectId } = require('../validations/objectId');
@@ -70,7 +71,13 @@ const postMessage = asyncHandler(async (req, res) => {
   sessionIdSchema.parse({ id });
   const { content } = messageSchema.parse(req.body);
   await AiService.verifyOwnership(id, req.user._id);
-  const { userMessage, aiMessage } = await AiService.addMessageAndRespond({ sessionId: id, userId: req.user._id, content });
+  // Phase 3: pass req.user so the prompt builder can personalise with name/location
+  const { userMessage, aiMessage } = await AiService.addMessageAndRespond({
+    sessionId: id,
+    userId: req.user._id,
+    content,
+    user: req.user,
+  });
   res.json({ success: true, data: { userMessage, aiMessage } });
 });
 
@@ -83,6 +90,36 @@ const getSessions = asyncHandler(async (req, res) => {
   res.json({ success: true, data: sessions });
 });
 
+// @desc  Get the context snapshot for a session
+// @route GET /api/ai/sessions/:id/context
+// @access Private
+const getSessionContext = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  // ── 1. Validate session id format ────────────────────────────────────────
+  sessionIdSchema.parse({ id });
+
+  // ── 2. Verify ownership — throws AppError(404) if not found,
+  //       AppError(403) if not the owner.  Returns the session document. ──
+  const session = await AiService.verifyOwnership(id, req.user._id);
+
+  // ── 3. Return existing snapshot or build on-demand ────────────────────────
+  // If the background build (triggered at session creation) has not finished
+  // yet, build the snapshot now, persist it, and return it.
+  let snapshot = session.contextSnapshot ?? null;
+
+  if (!snapshot) {
+    snapshot = await ContextService.buildUserContext(
+      req.user._id,
+      session.businessIdeaId ?? null
+    );
+    // Persist so future calls are served from cache
+    await ChatSession.findByIdAndUpdate(id, { contextSnapshot: snapshot });
+  }
+
+  res.json({ success: true, data: snapshot });
+});
+
 module.exports = {
   createSession,
   getSession,
@@ -90,4 +127,5 @@ module.exports = {
   getMessages,
   postMessage,
   getSessions,
+  getSessionContext,
 };

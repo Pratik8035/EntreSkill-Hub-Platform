@@ -5,6 +5,16 @@ const UserSkill = require('../models/UserSkill');
 const UserInterest = require('../models/UserInterest');
 
 /**
+ * Map a string proficiency level to a 1-5 numeric scale.
+ * Keeps the engine decoupled from model internals.
+ */
+const PROFICIENCY_SCORE = {
+  Beginner: 1,
+  Intermediate: 3,
+  Advanced: 5,
+};
+
+/**
  * Calculate recommendation scores for a given user.
  * Returns top 10 business ideas with match details.
  */
@@ -16,11 +26,18 @@ async function getRecommendationsForUser(userId) {
     UserInterest.find({ userId }).lean(),
   ]);
 
+  // Build maps keyed by string ID → numeric score
   const skillMap = {};
-  userSkills.forEach(us => { skillMap[us.skillId?.toString()] = us.proficiencyLevel; });
+  userSkills.forEach(us => {
+    const numericScore = PROFICIENCY_SCORE[us.proficiencyLevel] ?? 1;
+    skillMap[us.skillId?.toString()] = numericScore;
+  });
 
   const interestMap = {};
-  userInterests.forEach(ui => { interestMap[ui.interestId?.toString()] = ui.preferenceWeight; });
+  userInterests.forEach(ui => {
+    // preferenceWeight is already 1-5 numeric
+    interestMap[ui.interestId?.toString()] = ui.preferenceWeight;
+  });
 
   const ideas = await BusinessIdea.find({ isActive: true })
     .populate('requiredSkills.skillId', 'name')
@@ -33,9 +50,12 @@ async function getRecommendationsForUser(userId) {
     const matchedSkills = [];
     const missingSkills = [];
     idea.requiredSkills.forEach(rs => {
+      // Guard: skip if populate failed (null skillId)
+      if (!rs.skillId || !rs.skillId._id) return;
       const sid = rs.skillId._id.toString();
-      if (skillMap[sid]) {
-        skillScore += rs.weight * (skillMap[sid] / 5); // assuming proficiency 1-5
+      if (skillMap[sid] !== undefined) {
+        // skillMap[sid] is numeric 1-5; divide by 5 to normalise to 0-1
+        skillScore += rs.weight * (skillMap[sid] / 5);
         matchedSkills.push({ skill: rs.skillId.name, weight: rs.weight });
       } else {
         missingSkills.push({ skill: rs.skillId.name, weight: rs.weight });
@@ -47,8 +67,11 @@ async function getRecommendationsForUser(userId) {
     const matchedInterests = [];
     const missingInterests = [];
     idea.relatedInterests.forEach(ri => {
+      // Guard: skip if populate failed (null interestId)
+      if (!ri.interestId || !ri.interestId._id) return;
       const iid = ri.interestId._id.toString();
-      if (interestMap[iid]) {
+      if (interestMap[iid] !== undefined) {
+        // preferenceWeight is already 1-5 numeric
         interestScore += ri.weight * (interestMap[iid] / 5);
         matchedInterests.push({ interest: ri.interestId.name, weight: ri.weight });
       } else {

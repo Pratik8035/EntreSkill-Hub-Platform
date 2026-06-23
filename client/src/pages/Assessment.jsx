@@ -73,7 +73,7 @@ const Assessment = () => {
   useEffect(() => {
     const updated = selectedSkillIds.map((id) => {
       const existing = selectedSkills.find((s) => s.skillId === id);
-      return existing ? existing : { skillId: id, proficiencyLevel: 'beginner' };
+      return existing ? existing : { skillId: id, proficiencyLevel: 'Beginner' };
     });
     setSelectedSkills(updated);
   }, [selectedSkillIds]);
@@ -178,18 +178,18 @@ const Assessment = () => {
           <div className="space-y-4">
             <h2 className="text-xl font-semibold">Select Experience Level</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {['beginner', 'intermediate', 'experienced'].map((lvl) => (
+              {['Beginner', 'Intermediate', 'Experienced'].map((lvl) => (
                 <button
                   key={lvl}
                   type="button"
                   className={`p-4 rounded border-2 hover:shadow-md transition ${{
-                    beginner: 'border-blue-500',
-                    intermediate: 'border-green-500',
-                    experienced: 'border-purple-500',
+                    Beginner: 'border-blue-500',
+                    Intermediate: 'border-green-500',
+                    Experienced: 'border-purple-500',
                   }[lvl]} ${experienceLevel === lvl ? 'bg-slate-100' : ''}`}
                   onClick={() => setExperienceLevel(lvl)}
                 >
-                  {lvl.charAt(0).toUpperCase() + lvl.slice(1)}
+                  {lvl}
                 </button>
               ))}
             </div>

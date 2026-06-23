@@ -23,7 +23,8 @@ const validateRequest = (schema, source = 'body') => {
 
     if (!result.success) {
       // Transform Zod's flat errors array into a clean field-error format
-      const errors = result.error.errors.map((err) => ({
+      // Zod v4 uses .issues; .errors is kept as a fallback for v3 compatibility
+      const errors = (result.error.issues ?? result.error.errors ?? []).map((err) => ({
         field: err.path.join('.'),
         message: err.message,
       }));

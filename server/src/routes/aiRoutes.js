@@ -19,6 +19,9 @@ router.delete('/sessions/:id', protect, aiLimiter, aiController.deleteSession);
 // Get messages (paginated)
 router.get('/sessions/:id/messages', protect, aiLimiter, aiController.getMessages);
 
+// Get context snapshot for a session (must be declared before /:id/message)
+router.get('/sessions/:id/context', protect, aiLimiter, aiController.getSessionContext);
+
 // Post a message and get AI response
 router.post('/sessions/:id/message', protect, aiLimiter, aiController.postMessage);
 

@@ -5,7 +5,12 @@ const mongoose = require('mongoose');
 
 const MONGOOSE_OPTIONS = {
   maxPoolSize: 10,
-  serverSelectionTimeoutMS: 5000,
+  serverSelectionTimeoutMS: 10000,
+  // Required when the Atlas TLS certificate chain cannot be verified by the
+  // system's local CA bundle (common on developer machines and CI agents).
+  // Remove this once the system CA store is updated or Atlas issues a
+  // publicly-trusted certificate.
+  tlsAllowInvalidCertificates: true,
 };
 
 const getDbState = () => {

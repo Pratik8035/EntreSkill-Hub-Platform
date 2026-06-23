@@ -8,7 +8,7 @@ const {
 } = require('../controllers/assessmentController');
 const { protect } = require('../middleware/authMiddleware');
 const { validateRequest } = require('../middleware/validationMiddleware');
-const { SubmitAssessmentSchema, UpdateExperienceSchema } = require('../validations/assessment.validation');
+const { SubmitAssessmentSchema, UpdateAssessmentSchema } = require('../validations/assessment.validation');
 
 // Submit full assessment (new or complete)
 router.post('/', protect, validateRequest(SubmitAssessmentSchema), submitAssessment);
@@ -16,8 +16,8 @@ router.post('/', protect, validateRequest(SubmitAssessmentSchema), submitAssessm
 // Get full assessment data
 router.get('/', protect, getAssessment);
 
-// Partial update (e.g., only experience level)
-router.put('/', protect, validateRequest(UpdateExperienceSchema), updateAssessment);
+// Partial update – all fields optional (supports skills-only, interests-only, or experience-only updates)
+router.put('/', protect, validateRequest(UpdateAssessmentSchema), updateAssessment);
 
 // Lightweight status endpoint for UI redirect logic
 router.get('/status', protect, getAssessmentStatus);

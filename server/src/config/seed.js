@@ -7,6 +7,7 @@ const InterestCategory = require('../models/InterestCategory');
 const Interest = require('../models/Interest');
 const GovernmentScheme = require('../models/GovernmentScheme');
 const FundingProgram = require('../models/FundingProgram');
+const { seedBusinessData } = require('./businessIdeasSeed');
 
 /**
  * Business‑oriented seed data aligned with EntreSkill Hub requirements.
@@ -117,14 +118,14 @@ const interests = [
   { name: 'Franchising', description: 'Expand business through franchise networks', tags: ['franchise'], businessCategories: ['Growth'], isActive: true },
 
   // Sustainability
-  { name: 'Eco‑friendly Materials', description: 'Use sustainable inputs in production', tags: ['eco', 'materials'], businessCategories: ['Sustainability'], isActive: true },
+  { name: 'Eco-friendly Materials', description: 'Use sustainable inputs in production', tags: ['eco', 'materials'], businessCategories: ['Sustainability'], isActive: true },
   { name: 'Circular Economy', description: 'Design processes that reuse waste', tags: ['circular', 'reuse'], businessCategories: ['Sustainability'], isActive: true },
   { name: 'Renewable Energy Adoption', description: 'Integrate solar/wind power into operations', tags: ['renewable', 'energy'], businessCategories: ['Energy'], isActive: true },
 
   // Technology Adoption
   { name: 'Digital Transformation', description: 'Migrate traditional processes to digital', tags: ['digital', 'transformation'], businessCategories: ['Digital'], isActive: true },
   { name: 'Automation', description: 'Implement bots and RPA for efficiency', tags: ['automation', 'RPA'], businessCategories: ['Efficiency'], isActive: true },
-  { name: 'E‑commerce Platforms', description: 'Sell products via online storefronts', tags: ['e‑commerce', 'platform'], businessCategories: ['Retail'], isActive: true },
+  { name: 'E-commerce Platforms', description: 'Sell products via online storefronts', tags: ['e-commerce', 'platform'], businessCategories: ['Retail'], isActive: true },
 
   // Community Development
   { name: 'Local Partnerships', description: 'Collaborate with nearby businesses', tags: ['partnership', 'local'], businessCategories: ['Growth'], isActive: true },
@@ -204,13 +205,11 @@ async function runSeed() {
         'Startup Funding': 'Entrepreneurship',
         'Lean Business Models': 'Entrepreneurship',
         'Franchising': 'Entrepreneurship',
-        'Eco‑friendly Materials': 'Sustainability',
         'Eco-friendly Materials': 'Sustainability',
         'Circular Economy': 'Sustainability',
         'Renewable Energy Adoption': 'Sustainability',
         'Digital Transformation': 'Technology Adoption',
         'Automation': 'Technology Adoption',
-        'E‑commerce Platforms': 'Technology Adoption',
         'E-commerce Platforms': 'Technology Adoption',
         'Local Partnerships': 'Community Development',
         'Skill Sharing Networks': 'Community Development',
@@ -365,6 +364,11 @@ async function runSeed() {
     } else {
       console.log('ℹ️ Funding programs already exist – skipping');
     }
+
+    // ---- Business Ideas, Roadmaps, and Learning Resources ----
+    // Must run after skills and interests are seeded (depends on their ObjectIds).
+    await seedBusinessData();
+
   } catch (err) {
     console.error('❌ Seed error:', err);
   }

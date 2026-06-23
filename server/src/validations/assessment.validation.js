@@ -56,9 +56,20 @@ const UpdateExperienceSchema = z.object({
   }),
 });
 
+// ─── Partial Assessment Update Schema ────────────────────────────────────────
+// Used by PUT /api/assessment — all fields optional to support partial/draft updates.
+const UpdateAssessmentSchema = z.object({
+  experienceLevel: z.enum(['Beginner', 'Intermediate', 'Experienced'], {
+    errorMap: () => ({ message: "experienceLevel must be 'Beginner', 'Intermediate', or 'Experienced'." }),
+  }).optional(),
+  skills: z.array(UserSkillItemSchema).optional(),
+  interests: z.array(UserInterestItemSchema).optional(),
+});
+
 module.exports = {
   SaveUserSkillsSchema,
   SaveUserInterestsSchema,
   SubmitAssessmentSchema,
   UpdateExperienceSchema,
+  UpdateAssessmentSchema,
 };

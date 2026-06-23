@@ -41,6 +41,12 @@ const aiService = {
     const response = await api.post(`/ai/sessions/${sessionId}/message`, { content });
     return response.data;
   },
+
+  // Get the context snapshot used by the AI for a given session
+  getSessionContext: async (sessionId) => {
+    const response = await api.get(`/ai/sessions/${sessionId}/context`);
+    return response.data;
+  },
 };
 
 export default aiService;

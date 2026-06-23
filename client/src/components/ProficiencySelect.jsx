@@ -7,10 +7,11 @@
 
 import React from 'react';
 
+// Values match the backend enum exactly: Beginner | Intermediate | Advanced
 const defaultOptions = [
-  { value: 'beginner', label: 'Beginner' },
-  { value: 'intermediate', label: 'Intermediate' },
-  { value: 'advanced', label: 'Advanced' },
+  { value: 'Beginner', label: 'Beginner' },
+  { value: 'Intermediate', label: 'Intermediate' },
+  { value: 'Advanced', label: 'Advanced' },
 ];
 
 const ProficiencySelect = ({ value, onChange, options = defaultOptions }) => {
