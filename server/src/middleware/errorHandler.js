@@ -108,6 +108,14 @@ const errorHandler = (err, req, res, next) => {
   if (err.name === 'ValidationError') error = handleMongooseValidationError(err);
   if (err.name === 'JsonWebTokenError') error = handleJWTError();
   if (err.name === 'TokenExpiredError') error = handleJWTExpiredError();
+  // Zod parse errors thrown directly from controllers (not via validateRequest middleware)
+  if (err.name === 'ZodError') {
+    const zodErrors = (err.issues ?? err.errors ?? []).map((e) => ({
+      field: e.path.join('.'),
+      message: e.message,
+    }));
+    error = new AppError('Validation failed. Please check the provided values.', 400, zodErrors);
+  }
 
   // ── Send environment-appropriate response ─────────────────────────────────
   if (isDev) {

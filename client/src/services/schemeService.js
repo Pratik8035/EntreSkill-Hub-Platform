@@ -43,6 +43,30 @@ const schemeService = {
     const response = await api.get('/funding/recommended');
     return response.data;
   },
+
+  /**
+   * GET /api/funding/eligibility — Phase 2 engine results
+   */
+  getFundingEligibility: async () => {
+    const response = await api.get('/funding/eligibility');
+    return response.data;
+  },
+
+  /**
+   * GET /api/funding/recommendations — Phase 3 weighted recommendations
+   */
+  getFundingRecommendations: async () => {
+    const response = await api.get('/funding/recommendations');
+    return response.data;
+  },
+
+  /**
+   * GET /api/funding/advisor — Phase 4 advisor summary
+   */
+  getFundingAdvisor: async () => {
+    const response = await api.get('/funding/advisor');
+    return response.data;
+  },
 };
 
 export default schemeService;

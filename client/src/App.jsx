@@ -16,6 +16,7 @@ import ResourcesPage from './pages/ResourcesPage';
 import MentorsPage from './pages/MentorsPage';
 import AnalyticsDashboard from './pages/AnalyticsDashboard';
 import GovernmentSchemesPage from './pages/GovernmentSchemesPage';
+import FundingDashboard from './pages/FundingDashboard';
 import NetworkingPage from './pages/NetworkingPage';
 import AdminDashboard from './pages/AdminDashboard';
 
@@ -199,6 +200,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <GovernmentSchemesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/funding-dashboard"
+              element={
+                <ProtectedRoute>
+                  <FundingDashboard />
                 </ProtectedRoute>
               }
             />

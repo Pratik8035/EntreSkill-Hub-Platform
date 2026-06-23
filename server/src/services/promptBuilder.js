@@ -239,6 +239,59 @@ function _buildResourcesSection(snapshot) {
 }
 
 /**
+ * Section 7 – Funding Context (dynamic) — Sprint 5 Phase 4
+ * Injects the user's eligibility results and top funding recommendations
+ * so the AI can give grounded, personalised answers to funding questions.
+ *
+ * @param {object} snapshot
+ * @returns {string}  empty string when no funding data is available
+ */
+function _buildFundingContextSection(snapshot) {
+  const fc = snapshot?.fundingContext;
+  if (!fc) return '';
+
+  const eligible    = fc.eligibleSchemes           || [];
+  const partial     = fc.partiallyEligibleSchemes  || [];
+  const topRecs     = fc.topFundingRecommendations || [];
+
+  if (eligible.length === 0 && partial.length === 0 && topRecs.length === 0) return '';
+
+  const lines = [`## User's funding eligibility & recommendations`];
+
+  if (eligible.length > 0) {
+    lines.push(`\n### Schemes the user is eligible for`);
+    eligible.forEach((s) => {
+      lines.push(`- **${s.schemeName}** *(${s.type})* — eligibility score: ${s.score}/100`);
+    });
+  }
+
+  if (partial.length > 0) {
+    lines.push(`\n### Schemes the user is partially eligible for`);
+    partial.forEach((s) => {
+      lines.push(`- **${s.schemeName}** *(${s.type})* — score: ${s.score}/100 (some requirements unmet)`);
+    });
+  }
+
+  if (topRecs.length > 0) {
+    lines.push(`\n### Top funding recommendations for this user`);
+    topRecs.forEach((r, i) => {
+      const reasonText = r.reasons?.length ? ` — ${r.reasons[0]}` : '';
+      lines.push(`${i + 1}. **${r.name}** *(${r.type})* — score ${r.score}/100${reasonText}`);
+    });
+  }
+
+  lines.push(
+    `\n**When the user asks about funding, schemes, or financial support:**\n` +
+    `- Reference the eligible schemes above by name.\n` +
+    `- For partially eligible schemes, explain what requirements are unmet and how to address them.\n` +
+    `- Use the top recommendations when asked "which scheme should I apply for?" or "what funding options do I have?".\n` +
+    `- Never invent scheme names or eligibility criteria — only reference what is listed above.`
+  );
+
+  return lines.join('\n');
+}
+
+/**
  * Section 7 – Behaviour Rules (static)
  * Hard rules the model must follow in every response.
  * These are static and do not depend on context.
@@ -255,7 +308,9 @@ function _buildBehaviourRulesSection() {
 7. **Use simple, clear language.** Avoid jargon unless you explain it. Many users are first-time entrepreneurs with limited formal business training.
 8. **Format responses with markdown**: use ## headers for sections, bullet points for lists, and **bold** for key terms and action items.
 9. **Target 300–600 words per response** unless the question genuinely requires more detail (e.g. step-by-step guides).
-10. **Always end each response with one follow-up question** to keep the conversation moving forward and help the user think through the next step.`;
+10. **Always end each response with one follow-up question** to keep the conversation moving forward and help the user think through the next step.
+11. **For funding & scheme questions**: use the eligible schemes and top recommendations from Section 7. Answer "Which scheme should I apply for?", "Am I eligible for Mudra Loan?", "Which government scheme is best for me?", and "What funding options do I have?" using only the data provided — never fabricate scheme details.
+12. **If no funding data is available**, tell the user to visit the Schemes & Funding page to complete their profile and generate a business plan for personalised recommendations.`;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -281,6 +336,7 @@ function buildPersonalizedSystemPrompt(snapshot, user = null) {
     _buildRecommendationsSection(snapshot),
     _buildMentorSection(snapshot),
     _buildResourcesSection(snapshot),
+    _buildFundingContextSection(snapshot),  // Sprint 5 Phase 4
     _buildBehaviourRulesSection(),
   ]
     // Drop empty sections (e.g. business context when no idea is linked)

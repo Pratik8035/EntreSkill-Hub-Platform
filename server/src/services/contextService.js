@@ -37,6 +37,10 @@ const BusinessPlan     = require('../models/BusinessPlan');
 const { getRecommendationsForUser } = require('./recommendationEngine');
 const { getMentorMatches }          = require('./mentorMatchService');
 
+// Sprint 5 Phase 4: Funding context
+const EligibilityEngineService       = require('./eligibilityEngineService');
+const FundingRecommendationService   = require('./fundingRecommendationService');
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants
 // ─────────────────────────────────────────────────────────────────────────────
@@ -46,6 +50,7 @@ const MAX_MENTORS              = 3;
 const MAX_SKILLS_IN_SNAPSHOT   = 10; // keep snapshot lean for prompt token budget
 const MAX_INTERESTS_IN_SNAPSHOT = 8;
 const EXEC_SUMMARY_MAX_CHARS   = 250;
+const MAX_FUNDING_ELIGIBLE     = 3;  // Sprint 5 Phase 4
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ContextService
@@ -84,9 +89,9 @@ class ContextService {
     const hasBusinessIdea =
       businessIdeaId && mongoose.isValidObjectId(businessIdeaId);
 
-    // Run all four independent context fetches in parallel.
+    // Run all independent context fetches in parallel.
     // Each helper swallows its own errors and returns safe defaults.
-    const [assessment, recommendations, businessCtx, mentors] =
+    const [assessment, recommendations, businessCtx, mentors, fundingCtx] =
       await Promise.all([
         ContextService.getAssessmentContext(userId),
         ContextService.getRecommendationContext(userId),
@@ -94,6 +99,7 @@ class ContextService {
           ? ContextService.getBusinessContext(businessIdeaId)
           : ContextService._emptyBusinessContext(),
         ContextService.getMentorContext(userId),
+        ContextService.getFundingContext(userId),     // Sprint 5 Phase 4
       ]);
 
     // Flatten into the single snapshot shape stored in ChatSession
@@ -128,6 +134,9 @@ class ContextService {
 
       // Resources
       resources: businessCtx.resources,
+
+      // Sprint 5 Phase 4: Funding context
+      fundingContext: fundingCtx,
 
       // Cache timestamp
       builtAt: new Date(),
@@ -336,6 +345,58 @@ class ContextService {
     }
   }
 
+  // ── Sprint 5 Phase 4 – Funding context ────────────────────────────────────
+
+  /**
+   * Returns a compact funding snapshot: top eligible schemes,
+   * partially eligible schemes, and top funding recommendations.
+   * Capped for prompt token budget.
+   *
+   * @param {ObjectId|string} userId
+   * @returns {Promise<FundingContext>}
+   * {
+   *   eligibleSchemes           : [{ schemeName, score, type }],
+   *   partiallyEligibleSchemes  : [{ schemeName, score, type }],
+   *   topFundingRecommendations : [{ name, type, score, reasons }],
+   * }
+   */
+  static async getFundingContext(userId) {
+    const empty = {
+      eligibleSchemes:           [],
+      partiallyEligibleSchemes:  [],
+      topFundingRecommendations: [],
+    };
+
+    try {
+      const [eligibility, recommendations] = await Promise.all([
+        EligibilityEngineService.evaluate(userId),
+        FundingRecommendationService.recommend(userId),
+      ]);
+
+      return {
+        eligibleSchemes: eligibility.eligibleSchemes
+          .slice(0, MAX_FUNDING_ELIGIBLE)
+          .map(({ schemeName, score, type }) => ({ schemeName, score, type })),
+
+        partiallyEligibleSchemes: eligibility.partiallyEligibleSchemes
+          .slice(0, MAX_FUNDING_ELIGIBLE)
+          .map(({ schemeName, score, type }) => ({ schemeName, score, type })),
+
+        topFundingRecommendations: recommendations.recommendations
+          .slice(0, MAX_FUNDING_ELIGIBLE)
+          .map(({ name, type, score, reasons }) => ({
+            name,
+            type,
+            score,
+            reasons: reasons.slice(0, 2), // keep it lean
+          })),
+      };
+    } catch (err) {
+      console.error('[ContextService] getFundingContext error:', err.message);
+      return empty;
+    }
+  }
+
   // ── Private helpers ────────────────────────────────────────────────────────
 
   /** Returns a safe all-empty snapshot (used when userId is invalid). */
@@ -358,6 +419,12 @@ class ContextService {
       topRecommendations:   [],
       topMentors:           [],
       resources:            [],
+      // Sprint 5 Phase 4
+      fundingContext: {
+        eligibleSchemes:           [],
+        partiallyEligibleSchemes:  [],
+        topFundingRecommendations: [],
+      },
       builtAt:              new Date(),
     };
   }

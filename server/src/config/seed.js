@@ -8,6 +8,7 @@ const Interest = require('../models/Interest');
 const GovernmentScheme = require('../models/GovernmentScheme');
 const FundingProgram = require('../models/FundingProgram');
 const { seedBusinessData } = require('./businessIdeasSeed');
+const { seedSchemeData }   = require('./schemesSeed');
 
 /**
  * Business‑oriented seed data aligned with EntreSkill Hub requirements.
@@ -368,6 +369,9 @@ async function runSeed() {
     // ---- Business Ideas, Roadmaps, and Learning Resources ----
     // Must run after skills and interests are seeded (depends on their ObjectIds).
     await seedBusinessData();
+
+    // ---- Sprint 5 Phase 1: named schemes + funding programs ----
+    await seedSchemeData();
 
   } catch (err) {
     console.error('❌ Seed error:', err);
