@@ -120,6 +120,11 @@ app.use('/api/recommendations', require('./routes/recommendationRoutes'));
 app.use('/api/profile',      require('./routes/profileRoutes'));
 app.use('/api/analytics',    require('./routes/analyticsRoutes'));
 app.use('/api/business-plan',require('./routes/businessPlanRoutes'));
+app.use('/api/courses',      require('./routes/courseRoutes'));
+app.use('/api/lessons',      require('./routes/lessonRoutes'));
+app.use('/api/learning',     require('./routes/learningRoutes'));
+app.use('/api/quizzes',      require('./routes/quizRoutes'));
+app.use('/api/certificates', require('./routes/certificateRoutes'));
 
 // Global rate limit (after routes to avoid limiting health probes)
 app.use('/api', globalLimiter);

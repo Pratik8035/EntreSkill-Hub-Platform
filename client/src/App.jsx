@@ -19,6 +19,11 @@ import GovernmentSchemesPage from './pages/GovernmentSchemesPage';
 import FundingDashboard from './pages/FundingDashboard';
 import NetworkingPage from './pages/NetworkingPage';
 import AdminDashboard from './pages/AdminDashboard';
+import LearningDashboard from './pages/LearningDashboard';
+import CourseDetails from './pages/CourseDetails';
+import LessonViewer from './pages/LessonViewer';
+import QuizPage from './pages/QuizPage';
+import CertificatesPage from './pages/CertificatesPage';
 
 import { Toaster } from 'react-hot-toast';
 
@@ -225,6 +230,47 @@ function App() {
                 <AdminRoute>
                   <AdminDashboard />
                 </AdminRoute>
+              }
+            />
+            {/* Learning Platform Routes */}
+            <Route
+              path="/learning"
+              element={
+                <ProtectedRoute>
+                  <LearningDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/courses/:id"
+              element={
+                <ProtectedRoute>
+                  <CourseDetails />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/lessons/:id"
+              element={
+                <ProtectedRoute>
+                  <LessonViewer />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/quizzes/:id"
+              element={
+                <ProtectedRoute>
+                  <QuizPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/certificates"
+              element={
+                <ProtectedRoute>
+                  <CertificatesPage />
+                </ProtectedRoute>
               }
             />
 
