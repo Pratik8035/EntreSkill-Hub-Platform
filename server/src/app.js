@@ -42,12 +42,23 @@ app.use(helmet({
 const corsOptions = {
   origin: (origin, callback) => {
     const whitelist = (process.env.CLIENT_URL || 'http://localhost:5173,https://entre-skill-hub-platform.vercel.app').split(',').map(u => u.trim());
+    
     // Allow requests with no origin (e.g. Postman, server-to-server)
-    if (!origin || whitelist.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error(`CORS policy violation: origin '${origin}' is not permitted.`));
+    if (!origin) {
+      return callback(null, true);
     }
+
+    // Check whitelist
+    if (whitelist.includes(origin)) {
+      return callback(null, true);
+    }
+
+    // Allow all Vercel previews/branches related to the project
+    if (origin.endsWith('.vercel.app') && origin.includes('entre-skill-hub-platform')) {
+      return callback(null, true);
+    }
+
+    callback(new Error(`CORS policy violation: origin '${origin}' is not permitted.`));
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
