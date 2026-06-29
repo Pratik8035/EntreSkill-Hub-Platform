@@ -63,11 +63,34 @@ class CourseService {
       throw new AppError('Course not found', 404);
     }
 
+    // Fetch modules for the course
     const modules = await Module.find({ courseId })
       .sort({ order: 1 })
       .lean();
 
-    return modules;
+    // Gather all module IDs
+    const moduleIds = modules.map((m) => m._id);
+
+    // Fetch lessons belonging to these modules
+    const lessons = await Lesson.find({ moduleId: { $in: moduleIds } })
+      .sort({ order: 1 })
+      .lean();
+
+    // Group lessons by their moduleId
+    const lessonsByModule = lessons.reduce((acc, lesson) => {
+      const key = lesson.moduleId.toString();
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(lesson);
+      return acc;
+    }, {});
+
+    // Attach lessons array to each module
+    const modulesWithLessons = modules.map((module) => ({
+      ...module,
+      lessons: lessonsByModule[module._id.toString()] || [],
+    }));
+
+    return modulesWithLessons;
   }
 
   /**

@@ -26,6 +26,7 @@ const seedCoursesInternal = async () => {
       category: 'Entrepreneurship',
       difficultyLevel: 'Beginner',
       thumbnail: 'https://example.com/thumbnails/entrepreneurship.jpg',
+      videoUrl: 'https://www.youtube.com/embed/ZoqgAy3h4OM',
       estimatedDuration: 180,
       isPublished: true,
     });
@@ -41,7 +42,7 @@ const seedCoursesInternal = async () => {
       moduleId: module1_1._id,
       title: 'What is Entrepreneurship?',
       content: 'Entrepreneurship is the process of designing, launching, and running a new business. It involves identifying opportunities, taking risks, and creating value in the market.',
-      videoUrl: 'https://example.com/videos/entrepreneurship-intro.mp4',
+      videoUrl: 'https://www.youtube.com/embed/ZoqgAy3h4OM',
       duration: 15,
       order: 1,
     });
@@ -74,7 +75,7 @@ const seedCoursesInternal = async () => {
       moduleId: module1_2._id,
       title: 'Market Research Basics',
       content: 'Market research helps you understand your target audience, competition, and market trends. It is essential for validating your business idea.',
-      videoUrl: 'https://example.com/videos/market-research.mp4',
+      videoUrl: 'https://www.youtube.com/embed/lX7HmgEKCqI',
       duration: 20,
       order: 1,
     });
@@ -98,6 +99,7 @@ const seedCoursesInternal = async () => {
       category: 'Business Planning',
       difficultyLevel: 'Intermediate',
       thumbnail: 'https://example.com/thumbnails/business-planning.jpg',
+      videoUrl: 'https://www.youtube.com/embed/fBqeXjJzd0k',
       estimatedDuration: 240,
       isPublished: true,
     });
@@ -113,7 +115,7 @@ const seedCoursesInternal = async () => {
       moduleId: module2_1._id,
       title: 'Executive Summary',
       content: 'The executive summary is the most important section of your business plan. It provides a concise overview of your entire plan and should capture the reader\'s attention.',
-      videoUrl: 'https://example.com/videos/executive-summary.mp4',
+      videoUrl: 'https://www.youtube.com/embed/fBqeXjJzd0k',
       duration: 25,
       order: 1,
     });
@@ -146,7 +148,7 @@ const seedCoursesInternal = async () => {
       moduleId: module2_2._id,
       title: 'Revenue Models',
       content: 'A revenue model describes how your business will generate income. Common models include subscription, freemium, advertising, and transaction-based models.',
-      videoUrl: 'https://example.com/videos/revenue-models.mp4',
+      videoUrl: 'https://www.youtube.com/embed/nwQDkjEoQbw',
       duration: 30,
       order: 1,
     });
@@ -170,6 +172,7 @@ const seedCoursesInternal = async () => {
       category: 'Digital Marketing',
       difficultyLevel: 'Beginner',
       thumbnail: 'https://example.com/thumbnails/digital-marketing.jpg',
+      videoUrl: 'https://www.youtube.com/embed/neX5bP4mUms',
       estimatedDuration: 200,
       isPublished: true,
     });
@@ -185,7 +188,7 @@ const seedCoursesInternal = async () => {
       moduleId: module3_1._id,
       title: 'Understanding Digital Marketing',
       content: 'Digital marketing encompasses all marketing efforts that use electronic devices or the internet. It includes SEO, social media, email, content marketing, and more.',
-      videoUrl: 'https://example.com/videos/digital-marketing-intro.mp4',
+      videoUrl: 'https://www.youtube.com/embed/neX5bP4mUms',
       duration: 18,
       order: 1,
     });
@@ -213,7 +216,7 @@ const seedCoursesInternal = async () => {
       moduleId: module3_2._id,
       title: 'Social Media Strategy',
       content: 'A successful social media strategy requires understanding your audience, choosing the right platforms, creating engaging content, and measuring results.',
-      videoUrl: 'https://example.com/videos/social-media-strategy.mp4',
+      videoUrl: 'https://www.youtube.com/embed/YGrBjjSbvkY',
       duration: 22,
       order: 1,
     });
@@ -237,6 +240,7 @@ const seedCoursesInternal = async () => {
       category: 'Financial Management',
       difficultyLevel: 'Intermediate',
       thumbnail: 'https://example.com/thumbnails/financial-management.jpg',
+      videoUrl: 'https://www.youtube.com/embed/usMQL6AN_g8',
       estimatedDuration: 220,
       isPublished: true,
     });
@@ -252,7 +256,7 @@ const seedCoursesInternal = async () => {
       moduleId: module4_1._id,
       title: 'Reading Financial Statements',
       content: 'Financial statements include the balance sheet, income statement, and cash flow statement. Understanding these documents is crucial for business success.',
-      videoUrl: 'https://example.com/videos/financial-statements.mp4',
+      videoUrl: 'https://www.youtube.com/embed/usMQL6AN_g8',
       duration: 28,
       order: 1,
     });
@@ -285,7 +289,7 @@ const seedCoursesInternal = async () => {
       moduleId: module4_2._id,
       title: 'Cash Flow Basics',
       content: 'Cash flow is the movement of money in and out of your business. Positive cash flow means more money coming in than going out, which is essential for survival.',
-      videoUrl: 'https://example.com/videos/cash-flow.mp4',
+      videoUrl: 'https://www.youtube.com/embed/La8GWwUqXEg',
       duration: 24,
       order: 1,
     });
@@ -309,6 +313,7 @@ const seedCoursesInternal = async () => {
       category: 'Government Schemes',
       difficultyLevel: 'Beginner',
       thumbnail: 'https://example.com/thumbnails/government-schemes.jpg',
+      videoUrl: 'https://www.youtube.com/embed/rFpMDsWxLwQ',
       estimatedDuration: 160,
       isPublished: true,
     });
@@ -324,7 +329,7 @@ const seedCoursesInternal = async () => {
       moduleId: module5_1._id,
       title: 'Types of Government Support',
       content: 'Government support for entrepreneurs includes grants, loans, tax incentives, mentoring programs, and incubation facilities. Each type serves different business needs.',
-      videoUrl: 'https://example.com/videos/government-support.mp4',
+      videoUrl: 'https://www.youtube.com/embed/rFpMDsWxLwQ',
       duration: 20,
       order: 1,
     });
@@ -352,7 +357,7 @@ const seedCoursesInternal = async () => {
       moduleId: module5_2._id,
       title: 'Preparing Your Application',
       content: 'Successful applications require thorough preparation, including business plans, financial projections, and meeting all eligibility criteria.',
-      videoUrl: 'https://example.com/videos/application-prep.mp4',
+      videoUrl: 'https://www.youtube.com/embed/SqcY0GlETPk',
       duration: 25,
       order: 1,
     });

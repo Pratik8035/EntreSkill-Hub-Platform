@@ -30,6 +30,10 @@ const CourseSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
+  videoUrl: {
+    type: String,
+    trim: true,
+  },
   estimatedDuration: {
     type: Number, // in minutes
   },

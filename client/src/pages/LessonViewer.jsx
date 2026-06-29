@@ -14,6 +14,9 @@ const LessonViewer = () => {
   const [markingComplete, setMarkingComplete] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
 
+  // Helper: detect YouTube embed URL
+  const isYouTubeEmbed = (url) => url && url.includes('youtube.com/embed');
+
   useEffect(() => {
     const fetchLesson = async () => {
       setLoading(true);
@@ -119,15 +122,25 @@ const LessonViewer = () => {
           <div className="lg:col-span-2">
             {/* Video Player */}
             {lessonData.videoUrl && (
-              <div className="bg-black rounded-lg overflow-hidden mb-6 aspect-video">
-                <video
-                  controls
-                  className="w-full h-full"
-                  poster={lessonData.thumbnail || undefined}
-                >
-                  <source src={lessonData.videoUrl} type="video/mp4" />
-                  Your browser does not support the video tag.
-                </video>
+              <div className="rounded-lg overflow-hidden mb-6 bg-black" style={{ aspectRatio: '16/9' }}>
+                {isYouTubeEmbed(lessonData.videoUrl) ? (
+                  <iframe
+                    src={lessonData.videoUrl}
+                    title={lessonData.title}
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : (
+                  <video
+                    controls
+                    className="w-full h-full"
+                    poster={lessonData.thumbnail || undefined}
+                  >
+                    <source src={lessonData.videoUrl} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                )}
               </div>
             )}
 
