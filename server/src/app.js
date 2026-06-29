@@ -41,7 +41,7 @@ app.use(helmet({
 // ─── CORS ──────────────────────────────────────────────────────────────────
 const corsOptions = {
   origin: (origin, callback) => {
-    const whitelist = (process.env.CLIENT_URL || 'http://localhost:5173').split(',').map(u => u.trim());
+    const whitelist = (process.env.CLIENT_URL || 'http://localhost:5173,https://entre-skill-hub-platform.vercel.app').split(',').map(u => u.trim());
     // Allow requests with no origin (e.g. Postman, server-to-server)
     if (!origin || whitelist.includes(origin)) {
       callback(null, true);
