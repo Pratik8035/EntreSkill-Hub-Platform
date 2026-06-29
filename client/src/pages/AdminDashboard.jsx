@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import { Shield, Users, Award, Lightbulb, Landmark, BarChart3, ArrowLeft } from 'lucide-react';
+import {
+  Shield, Users, Award, Lightbulb, Landmark, BarChart3,
+  BookOpen, Settings, ArrowLeft, TrendingUp
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import UserManagement from '../components/admin/UserManagement';
@@ -7,13 +10,19 @@ import MentorManagement from '../components/admin/MentorManagement';
 import BusinessIdeaManagement from '../components/admin/BusinessIdeaManagement';
 import SchemeManagement from '../components/admin/SchemeManagement';
 import AdminAnalytics from '../components/admin/AdminAnalytics';
+import CourseManagement from '../components/admin/CourseManagement';
+import AnalyticsPage from '../components/admin/AnalyticsPage';
+import SystemSettings from '../components/admin/SystemSettings';
 
 const TABS = [
-  { id: 'overview', label: 'System Overview', icon: BarChart3 },
-  { id: 'users', label: 'User Directory', icon: Users },
-  { id: 'mentors', label: 'Mentor Configuration', icon: Award },
-  { id: 'ideas', label: 'Business Model Forge', icon: Lightbulb },
-  { id: 'schemes', label: 'Schemes & Funding', icon: Landmark }
+  { id: 'overview',   label: 'System Overview',        icon: BarChart3  },
+  { id: 'analytics',  label: 'Enhanced Analytics',      icon: TrendingUp },
+  { id: 'users',      label: 'User Directory',          icon: Users      },
+  { id: 'mentors',    label: 'Mentor Configuration',    icon: Award      },
+  { id: 'ideas',      label: 'Business Model Forge',    icon: Lightbulb  },
+  { id: 'courses',    label: 'Course Management',       icon: BookOpen   },
+  { id: 'schemes',    label: 'Schemes & Funding',       icon: Landmark   },
+  { id: 'settings',   label: 'System Settings',         icon: Settings   },
 ];
 
 const AdminDashboard = () => {
@@ -21,25 +30,22 @@ const AdminDashboard = () => {
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'overview':
-        return <AdminAnalytics />;
-      case 'users':
-        return <UserManagement />;
-      case 'mentors':
-        return <MentorManagement />;
-      case 'ideas':
-        return <BusinessIdeaManagement />;
-      case 'schemes':
-        return <SchemeManagement />;
-      default:
-        return <AdminAnalytics />;
+      case 'overview':   return <AdminAnalytics />;
+      case 'analytics':  return <AnalyticsPage />;
+      case 'users':      return <UserManagement />;
+      case 'mentors':    return <MentorManagement />;
+      case 'ideas':      return <BusinessIdeaManagement />;
+      case 'courses':    return <CourseManagement />;
+      case 'schemes':    return <SchemeManagement />;
+      case 'settings':   return <SystemSettings />;
+      default:           return <AdminAnalytics />;
     }
   };
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-8">
-        
+
         {/* Back link */}
         <Link
           to="/dashboard"
@@ -58,22 +64,24 @@ const AdminDashboard = () => {
             </div>
             <div>
               <span className="text-[10px] font-extrabold text-rose-600 dark:text-rose-400 uppercase tracking-widest">Platform Administration</span>
-              <h1 className="font-outfit text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-0.5 animate-fade-in">
+              <h1 className="font-outfit text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-0.5">
                 Admin Control Center
               </h1>
             </div>
           </div>
           <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm">
-            Configure system configurations, manage registrations, curate funding grants, and track platform diagnostics.
+            Configure system settings, manage registrations, curate content, and track platform diagnostics.
           </p>
         </div>
 
         {/* Dashboard Layout Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
-          
+
           {/* Navigation Sidebar */}
           <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-4 space-y-1 shadow-sm lg:sticky lg:top-8">
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest px-3.5 block mb-2 font-outfit">Navigation Panels</span>
+            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest px-3.5 block mb-2 font-outfit">
+              Navigation Panels
+            </span>
             {TABS.map(tab => {
               const isActive = activeTab === tab.id;
               return (
@@ -99,7 +107,6 @@ const AdminDashboard = () => {
           </div>
 
         </div>
-
       </div>
     </div>
   );

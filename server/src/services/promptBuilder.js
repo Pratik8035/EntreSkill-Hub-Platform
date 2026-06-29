@@ -313,9 +313,54 @@ function _buildBehaviourRulesSection() {
 12. **If no funding data is available**, tell the user to visit the Schemes & Funding page to complete their profile and generate a business plan for personalised recommendations.`;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Public API
-// ─────────────────────────────────────────────────────────────────────────────
+/**
+ * Section 8.5 – Financial Context (dynamic) — Sprint 12
+ * Injects user's financial health data for financial question support
+ */
+function _buildFinancialContextSection(snapshot) {
+  const fc = snapshot?.financialContext;
+  if (!fc) return '';
+  if (!fc.revenue && !fc.expenses && !fc.financialHealthScore) return '';
+
+  const lines = ['## Financial Context'];
+  if (fc.financialHealthScore !== null && fc.financialHealthScore !== undefined)
+    lines.push(`- **Financial Health Score**: ${fc.financialHealthScore}/100`);
+  if (fc.revenue !== undefined)
+    lines.push(`- **Monthly Revenue**: ₹${fc.revenue?.toLocaleString('en-IN') ?? 0}`);
+  if (fc.expenses !== undefined)
+    lines.push(`- **Monthly Expenses**: ₹${fc.expenses?.toLocaleString('en-IN') ?? 0}`);
+  if (fc.profit !== undefined)
+    lines.push(`- **Profit/Loss**: ₹${fc.profit?.toLocaleString('en-IN') ?? 0} (${fc.isProfit ? 'Profit' : 'Loss'})`);
+  if (fc.netCashFlow !== undefined)
+    lines.push(`- **Net Cash Flow**: ₹${fc.netCashFlow?.toLocaleString('en-IN') ?? 0}`);
+  if (fc.revenueGrowth !== undefined)
+    lines.push(`- **Revenue Growth (MoM)**: ${fc.revenueGrowth ?? 0}%`);
+  if (fc.burnRate)
+    lines.push(`- **Burn Rate**: ₹${fc.burnRate?.toLocaleString('en-IN') ?? 0}/month`);
+  if (fc.overdueInvoices > 0)
+    lines.push(`- ⚠️ **Overdue Invoices**: ${fc.overdueInvoices}`);
+
+  lines.push(`\nWhen the user asks about finances, budgeting, revenue growth, expenses, cash flow, or investments, reference their actual financial data above. Direct them to the Finance module for detailed tracking.`);
+  return lines.join('\n');
+}
+
+
+function _buildCommunityContextSection(snapshot) {
+  const cc = snapshot?.communityContext;
+  if (!cc) return '';
+  const { recentPostCount, followersCount, followingCount, upcomingSessionCount } = cc;
+  if (!recentPostCount && !followersCount && !followingCount && !upcomingSessionCount) return '';
+
+  const lines = ['## Community & Collaboration context'];
+  if (followersCount)       lines.push(`- **Followers**: ${followersCount}`);
+  if (followingCount)       lines.push(`- **Following**: ${followingCount}`);
+  if (recentPostCount)      lines.push(`- **Posts this month**: ${recentPostCount}`);
+  if (upcomingSessionCount) lines.push(`- **Upcoming mentor sessions**: ${upcomingSessionCount}`);
+  lines.push(`\nWhen asked about networking, collaboration or community building, reference the user's community engagement above.`);
+  return lines.join('\n');
+}
+
+
 
 /**
  * Build a fully personalised system prompt from the user's context snapshot.
@@ -336,7 +381,9 @@ function buildPersonalizedSystemPrompt(snapshot, user = null) {
     _buildRecommendationsSection(snapshot),
     _buildMentorSection(snapshot),
     _buildResourcesSection(snapshot),
-    _buildFundingContextSection(snapshot),  // Sprint 5 Phase 4
+    _buildFundingContextSection(snapshot),    // Sprint 5 Phase 4
+    _buildFinancialContextSection(snapshot), // Sprint 12
+    _buildCommunityContextSection(snapshot), // Sprint 11
     _buildBehaviourRulesSection(),
   ]
     // Drop empty sections (e.g. business context when no idea is linked)

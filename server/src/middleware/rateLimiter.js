@@ -45,12 +45,14 @@ const refreshLimiter = rateLimit({
   handler: rateLimitHandler,
 });
 
-const aiLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 10,
-  standardHeaders: true,
-  legacyHeaders: false,
-  handler: rateLimitHandler,
-});
+const aiLimiter = process.env.NODE_ENV === 'development'
+  ? (req, res, next) => next()  // no-op in development
+  : rateLimit({
+      windowMs: 60 * 1000, // 1 minute
+      max: 10,
+      standardHeaders: true,
+      legacyHeaders: false,
+      handler: rateLimitHandler,
+    });
 
 module.exports = { globalLimiter, authLimiter, refreshLimiter, aiLimiter };

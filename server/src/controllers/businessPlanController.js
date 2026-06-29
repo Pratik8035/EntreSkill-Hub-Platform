@@ -15,7 +15,7 @@ const generatePlan = asyncHandler(async (req, res) => {
     const plan = await generateBusinessPlan(businessIdeaId, userId);
     sendSuccess(res, plan, 'Business plan generated');
   } catch (err) {
-    sendError(res, err.message, 500);
+    sendError(res, err.message, [], 500);
   }
 });
 
@@ -28,7 +28,7 @@ const getPlan = asyncHandler(async (req, res) => {
     .populate('costEstimate')
     .populate('revenueProjection')
     .lean();
-  if (!plan) return sendError(res, 'Business plan not found', 404);
+  if (!plan) return sendError(res, 'Business plan not found', [], 404);
   sendSuccess(res, plan, 'Business plan fetched');
 });
 

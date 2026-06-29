@@ -1,9 +1,19 @@
 import api from './api.js';
 
 const adminService = {
-  // Users
+  // ── Dashboard ──────────────────────────────────────────────────────────────
+  getDashboardStats: async () => {
+    const response = await api.get('/admin/dashboard');
+    return response.data;
+  },
+
+  // ── Users ──────────────────────────────────────────────────────────────────
   getUsers: async (params = {}) => {
     const response = await api.get('/admin/users', { params });
+    return response.data;
+  },
+  getUserById: async (id) => {
+    const response = await api.get(`/admin/users/${id}`);
     return response.data;
   },
   updateUser: async (id, data) => {
@@ -15,7 +25,7 @@ const adminService = {
     return response.data;
   },
 
-  // Mentors
+  // ── Mentors ────────────────────────────────────────────────────────────────
   getMentors: async (params = {}) => {
     const response = await api.get('/admin/mentors', { params });
     return response.data;
@@ -29,7 +39,7 @@ const adminService = {
     return response.data;
   },
 
-  // Business Ideas
+  // ── Business Ideas ─────────────────────────────────────────────────────────
   getBusinessIdeas: async (params = {}) => {
     const response = await api.get('/admin/business-ideas', { params });
     return response.data;
@@ -47,7 +57,11 @@ const adminService = {
     return response.data;
   },
 
-  // Schemes
+  // ── Government Schemes ────────────────────────────────────────────────────
+  getSchemes: async (params = {}) => {
+    const response = await api.get('/admin/schemes', { params });
+    return response.data;
+  },
   createScheme: async (data) => {
     const response = await api.post('/admin/schemes', data);
     return response.data;
@@ -61,7 +75,11 @@ const adminService = {
     return response.data;
   },
 
-  // Funding Programs
+  // ── Funding Programs ──────────────────────────────────────────────────────
+  getFunding: async (params = {}) => {
+    const response = await api.get('/admin/funding', { params });
+    return response.data;
+  },
   createFunding: async (data) => {
     const response = await api.post('/admin/funding', data);
     return response.data;
@@ -75,11 +93,33 @@ const adminService = {
     return response.data;
   },
 
-  // Admin Analytics
+  // ── Courses ───────────────────────────────────────────────────────────────
+  getCourses: async (params = {}) => {
+    const response = await api.get('/admin/courses', { params });
+    return response.data;
+  },
+  createCourse: async (data) => {
+    const response = await api.post('/admin/courses', data);
+    return response.data;
+  },
+  updateCourse: async (id, data) => {
+    const response = await api.put(`/admin/courses/${id}`, data);
+    return response.data;
+  },
+  deleteCourse: async (id) => {
+    const response = await api.delete(`/admin/courses/${id}`);
+    return response.data;
+  },
+
+  // ── Analytics ─────────────────────────────────────────────────────────────
   getAdminAnalytics: async () => {
     const response = await api.get('/admin/analytics');
     return response.data;
-  }
+  },
+  getEnhancedAnalytics: async () => {
+    const response = await api.get('/admin/analytics/enhanced');
+    return response.data;
+  },
 };
 
 export default adminService;

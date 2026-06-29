@@ -10,20 +10,16 @@ require('dotenv').config();
  * Creates 5 sample courses with modules, lessons, and quizzes
  */
 
-const seedCourses = async () => {
+const seedCoursesInternal = async () => {
   try {
-    // Connect to MongoDB
-    await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/entreskill');
-    console.log('Connected to MongoDB');
-
     // Clear existing data
     await Quiz.deleteMany({});
-    await Lesson.deleteMany({});
-    await Module.deleteMany({});
-    await Course.deleteMany({});
-    console.log('Cleared existing course data');
+  await Lesson.deleteMany({});
+  await Module.deleteMany({});
+  await Course.deleteMany({});
+  console.log('Cleared existing course data');
 
-    // Course 1: Entrepreneurship Basics
+  // Course 1: Entrepreneurship Basics
     const course1 = await Course.create({
       title: 'Entrepreneurship Basics',
       description: 'Learn the fundamentals of starting and running your own business. This course covers essential concepts every entrepreneur should know.',
@@ -375,8 +371,17 @@ const seedCourses = async () => {
 
     console.log('✅ Seed data created successfully!');
     console.log(`Created 5 courses with modules, lessons, and quizzes`);
+  } catch (error) {
+    console.error('Error seeding data:', error);
+    throw error;
+  }
+};
 
-    // Disconnect
+const seedCourses = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/entreskill');
+    console.log('Connected to MongoDB');
+    await seedCoursesInternal();
     await mongoose.disconnect();
     console.log('Disconnected from MongoDB');
   } catch (error) {
@@ -385,5 +390,8 @@ const seedCourses = async () => {
   }
 };
 
-// Run the seed function
-seedCourses();
+module.exports = { seedCourses, seedCoursesInternal };
+
+if (require.main === module) {
+  seedCourses();
+}

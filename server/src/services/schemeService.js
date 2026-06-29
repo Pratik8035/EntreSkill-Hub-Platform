@@ -28,9 +28,13 @@ class SchemeService {
   static async listSchemes({ category, provider, state, search, isActive, page = 1, limit = 10 } = {}) {
     const filter = {};
 
-    if (isActive !== undefined) {
+    // Default to only active schemes if isActive not specified
+    if (isActive === undefined) {
+      filter.isActive = true;
+    } else {
       filter.isActive = isActive;
     }
+
 
     if (category) {
       filter.category = { $regex: category, $options: 'i' };

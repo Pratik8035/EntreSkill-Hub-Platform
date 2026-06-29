@@ -41,6 +41,18 @@ const { getMentorMatches }          = require('./mentorMatchService');
 const EligibilityEngineService       = require('./eligibilityEngineService');
 const FundingRecommendationService   = require('./fundingRecommendationService');
 
+// Sprint 11: Community context
+const CommunityPost  = require('../models/CommunityPost');
+const UserFollow     = require('../models/UserFollow');
+const MentorSession  = require('../models/MentorSession');
+
+// Sprint 12: Financial context
+let FinancialAnalyticsService;
+const getFinancialAnalytics = () => {
+  if (!FinancialAnalyticsService) FinancialAnalyticsService = require('./financialAnalyticsService');
+  return FinancialAnalyticsService;
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants
 // ─────────────────────────────────────────────────────────────────────────────
@@ -91,7 +103,7 @@ class ContextService {
 
     // Run all independent context fetches in parallel.
     // Each helper swallows its own errors and returns safe defaults.
-    const [assessment, recommendations, businessCtx, mentors, fundingCtx] =
+    const [assessment, recommendations, businessCtx, mentors, fundingCtx, communityCtx, financialCtx] =
       await Promise.all([
         ContextService.getAssessmentContext(userId),
         ContextService.getRecommendationContext(userId),
@@ -100,6 +112,8 @@ class ContextService {
           : ContextService._emptyBusinessContext(),
         ContextService.getMentorContext(userId),
         ContextService.getFundingContext(userId),     // Sprint 5 Phase 4
+        ContextService.getCommunityContext(userId),   // Sprint 11
+        ContextService.getFinancialContext(userId),   // Sprint 12
       ]);
 
     // Flatten into the single snapshot shape stored in ChatSession
@@ -137,6 +151,12 @@ class ContextService {
 
       // Sprint 5 Phase 4: Funding context
       fundingContext: fundingCtx,
+
+      // Sprint 11: Community context
+      communityContext: communityCtx,
+
+      // Sprint 12: Financial context
+      financialContext: financialCtx,
 
       // Cache timestamp
       builtAt: new Date(),
@@ -397,9 +417,64 @@ class ContextService {
     }
   }
 
-  // ── Private helpers ────────────────────────────────────────────────────────
+  // ── Sprint 11 — Community context ────────────────────────────────────────
 
-  /** Returns a safe all-empty snapshot (used when userId is invalid). */
+  static async getCommunityContext(userId) {
+    const empty = { recentPostCount: 0, followersCount: 0, followingCount: 0, upcomingSessionCount: 0 };
+    try {
+      const now = new Date();
+      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      const [recentPosts, followers, following, sessions] = await Promise.all([
+        CommunityPost.countDocuments({ authorId: userId, createdAt: { $gte: thirtyDaysAgo } }),
+        UserFollow.countDocuments({ followingId: userId }),
+        UserFollow.countDocuments({ followerId: userId }),
+        MentorSession.countDocuments({
+          $or: [{ mentorId: userId }, { menteeId: userId }],
+          status: { $in: ['pending', 'confirmed'] },
+          scheduledAt: { $gte: now },
+        }),
+      ]);
+      return {
+        recentPostCount:       recentPosts,
+        followersCount:        followers,
+        followingCount:        following,
+        upcomingSessionCount:  sessions,
+      };
+    } catch (err) {
+      console.error('[ContextService] getCommunityContext error:', err.message);
+      return empty;
+    }
+  }
+
+  // ── Sprint 12 — Financial context ────────────────────────────────────────
+
+  static async getFinancialContext(userId) {
+    const empty = {
+      revenue: 0, expenses: 0, profit: 0, isProfit: true,
+      netCashFlow: 0, financialHealthScore: null,
+      revenueGrowth: 0, burnRate: 0, overdueInvoices: 0,
+    };
+    try {
+      const FA = getFinancialAnalytics();
+      const analytics = await FA.getAnalytics(userId);
+      return {
+        revenue: analytics.revenue,
+        expenses: analytics.expenses,
+        profit: analytics.profit,
+        isProfit: analytics.isProfit,
+        netCashFlow: analytics.netCashFlow,
+        financialHealthScore: analytics.financialHealthScore,
+        revenueGrowth: analytics.revenueGrowth,
+        burnRate: analytics.burnRate,
+        overdueInvoices: analytics.overdueInvoices,
+      };
+    } catch (err) {
+      console.error('[ContextService] getFinancialContext error:', err.message);
+      return empty;
+    }
+  }
+
+  // ── Private helpers ────────────────────────────────────────────────────────
   static _emptySnapshot() {
     return {
       experienceLevel:      'Beginner',
@@ -424,6 +499,10 @@ class ContextService {
         eligibleSchemes:           [],
         partiallyEligibleSchemes:  [],
         topFundingRecommendations: [],
+      },
+      // Sprint 11
+      communityContext: {
+        recentPostCount: 0, followersCount: 0, followingCount: 0, upcomingSessionCount: 0,
       },
       builtAt:              new Date(),
     };

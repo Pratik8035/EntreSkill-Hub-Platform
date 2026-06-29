@@ -7,8 +7,9 @@ const InterestCategory = require('../models/InterestCategory');
 const Interest = require('../models/Interest');
 const GovernmentScheme = require('../models/GovernmentScheme');
 const FundingProgram = require('../models/FundingProgram');
+const User = require('../models/User');
 const { seedBusinessData } = require('./businessIdeasSeed');
-const { seedSchemeData }   = require('./schemesSeed');
+const { seedSchemeData } = require('./schemesSeed');
 
 /**
  * Business‑oriented seed data aligned with EntreSkill Hub requirements.
@@ -143,6 +144,27 @@ const interests = [
  */
 async function runSeed() {
   try {
+    // ---- Admin User ----
+    const adminExists = await User.findOne({ role: 'admin' });
+    if (!adminExists) {
+      await User.create({
+        name: 'System Admin',
+        email: 'bugadepratik123@gmail.com',
+        password: 'Pratik@123',
+        role: 'admin',
+        isVerified: true,
+        profile: {
+          skills: ['administration', 'management'],
+          location: 'HQ',
+          bio: 'System Administrator for EntreSkill Hub Platform',
+          phoneNumber: '1234567890'
+        }
+      });
+      console.log('✅ Default admin user seeded (admin@entreskill.com / adminpassword)');
+    } else {
+      console.log('ℹ️ Admin user already exists – skipping');
+    }
+
     // ---- Skill Categories ----
     const catCount = await SkillCategory.estimatedDocumentCount();
     if (catCount === 0) {
@@ -372,6 +394,17 @@ async function runSeed() {
 
     // ---- Sprint 5 Phase 1: named schemes + funding programs ----
     await seedSchemeData();
+
+    // ---- Courses, Modules, Lessons, Quizzes ----
+    const Course = require('../models/Course');
+    const courseCount = await Course.estimatedDocumentCount();
+    if (courseCount === 0) {
+      const { seedCoursesInternal } = require('../seeds/courseSeed');
+      await seedCoursesInternal();
+      console.log('✅ Demo courses seeded');
+    } else {
+      console.log('ℹ️ Courses already exist – skipping');
+    }
 
   } catch (err) {
     console.error('❌ Seed error:', err);

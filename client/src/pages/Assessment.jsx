@@ -2,7 +2,8 @@
 // Assessment Wizard page – multi‑step flow for skills, interests, experience level and review.
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+
+import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 import skillService from '../services/skillService.js';
@@ -35,7 +36,8 @@ const Assessment = () => {
   const [selectedInterests, setSelectedInterests] = useState([]);
   const [experienceLevel, setExperienceLevel] = useState('');
 
-  // Load draft on mount
+  // Load draft on mount and reset when navigating back to this page
+  const location = useLocation();
   useEffect(() => {
     const draft = loadDraft();
     if (draft) {
@@ -45,8 +47,16 @@ const Assessment = () => {
       setSelectedInterests(draft.selectedInterests ?? []);
       setSelectedInterestIds((draft.selectedInterests ?? []).map((i) => i.interestId));
       setExperienceLevel(draft.experienceLevel ?? '');
+    } else {
+      // If no draft, ensure fresh state when revisiting
+      setStep(STEP_SKILLS);
+      setSelectedSkills([]);
+      setSelectedSkillIds([]);
+      setSelectedInterests([]);
+      setSelectedInterestIds([]);
+      setExperienceLevel('');
     }
-  }, []);
+  }, [location]);
 
   // Fetch data once
   useEffect(() => {
@@ -58,17 +68,16 @@ const Assessment = () => {
           interestService.getInterests(),
           interestService.getInterestCategories(),
         ]);
-        setAllSkills(skillsRes);
-        setSkillCategories(skillCatRes);
-        setAllInterests(interestsRes);
-        setInterestCategories(interestCatRes);
+        setAllSkills(skillsRes.data || []);
+        setSkillCategories(skillCatRes.data || []);
+        setAllInterests(interestsRes.data || []);
+        setInterestCategories(interestCatRes.data || []);
       } catch (err) {
         toast.error('Failed to load data');
       }
     };
     fetchData();
-  }, []);
-
+  }, [location]);
   // Sync selectedSkills when skill IDs change
   useEffect(() => {
     const updated = selectedSkillIds.map((id) => {

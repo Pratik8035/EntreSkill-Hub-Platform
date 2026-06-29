@@ -502,3 +502,73 @@ describe('buildSystemPrompt() legacy', () => {
     expect(result).toMatch(/How you must respond/);
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Sprint 11 – Community Context section
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Sprint 11 – Community Context section', () => {
+  const COMMUNITY_SNAPSHOT = {
+    ...FULL_SNAPSHOT,
+    communityContext: {
+      recentPostCount:      5,
+      followersCount:       12,
+      followingCount:       8,
+      upcomingSessionCount: 2,
+    },
+  };
+
+  it('includes community section when communityContext is present', () => {
+    const prompt = buildPersonalizedSystemPrompt(COMMUNITY_SNAPSHOT, MOCK_USER);
+    expect(prompt).toMatch(/Community & Collaboration context/);
+  });
+
+  it('shows followers count in community section', () => {
+    const prompt = buildPersonalizedSystemPrompt(COMMUNITY_SNAPSHOT, MOCK_USER);
+    expect(prompt).toContain('12');
+  });
+
+  it('shows following count', () => {
+    const prompt = buildPersonalizedSystemPrompt(COMMUNITY_SNAPSHOT, MOCK_USER);
+    expect(prompt).toContain('8');
+  });
+
+  it('shows upcoming mentor sessions count', () => {
+    const prompt = buildPersonalizedSystemPrompt(COMMUNITY_SNAPSHOT, MOCK_USER);
+    expect(prompt).toContain('2');
+  });
+
+  it('shows posts this month count', () => {
+    const prompt = buildPersonalizedSystemPrompt(COMMUNITY_SNAPSHOT, MOCK_USER);
+    expect(prompt).toContain('5');
+  });
+
+  it('omits community section when communityContext is null', () => {
+    const snap = { ...FULL_SNAPSHOT, communityContext: null };
+    const prompt = buildPersonalizedSystemPrompt(snap, MOCK_USER);
+    expect(prompt).not.toMatch(/Community & Collaboration context/);
+  });
+
+  it('omits community section when all counts are zero', () => {
+    const snap = {
+      ...FULL_SNAPSHOT,
+      communityContext: { recentPostCount: 0, followersCount: 0, followingCount: 0, upcomingSessionCount: 0 },
+    };
+    const prompt = buildPersonalizedSystemPrompt(snap, MOCK_USER);
+    expect(prompt).not.toMatch(/Community & Collaboration context/);
+  });
+
+  it('does NOT throw when communityContext is missing from snapshot', () => {
+    const snap = { ...FULL_SNAPSHOT };
+    delete snap.communityContext;
+    expect(() => buildPersonalizedSystemPrompt(snap, MOCK_USER)).not.toThrow();
+  });
+
+  it('community section appears between funding section and behaviour rules', () => {
+    const prompt = buildPersonalizedSystemPrompt(COMMUNITY_SNAPSHOT, MOCK_USER);
+    const communityIdx = prompt.indexOf('Community & Collaboration context');
+    const behaviourIdx = prompt.indexOf('How you must respond');
+    expect(communityIdx).toBeGreaterThan(-1);
+    expect(behaviourIdx).toBeGreaterThan(communityIdx);
+  });
+});

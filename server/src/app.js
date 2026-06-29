@@ -125,6 +125,17 @@ app.use('/api/lessons',      require('./routes/lessonRoutes'));
 app.use('/api/learning',     require('./routes/learningRoutes'));
 app.use('/api/quizzes',      require('./routes/quizRoutes'));
 app.use('/api/certificates', require('./routes/certificateRoutes'));
+app.use('/api/business-execution', require('./routes/businessExecutionRoutes'));
+app.use('/api/notifications',      require('./routes/notificationRoutes'));
+app.use('/api/reports',            require('./routes/reportRoutes'));
+
+// ── Sprint 11 ────────────────────────────────────────────────────────────────
+app.use('/api/community',          require('./routes/communityRoutes'));
+app.use('/api/mentor-sessions',    require('./routes/mentorSessionRoutes'));
+app.use('/api/chat',               require('./routes/chatRoutes'));
+
+// ── Sprint 12 ────────────────────────────────────────────────────────────────
+app.use('/api/finance',            require('./routes/financialRoutes'));
 
 // Global rate limit (after routes to avoid limiting health probes)
 app.use('/api', globalLimiter);

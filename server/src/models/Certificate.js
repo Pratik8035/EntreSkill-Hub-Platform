@@ -40,7 +40,6 @@ const CertificateSchema = new mongoose.Schema({
 // Indexes for efficient queries
 CertificateSchema.index({ userId: 1 });
 CertificateSchema.index({ courseId: 1 });
-CertificateSchema.index({ certificateNumber: 1 });
 CertificateSchema.index({ userId: 1, courseId: 1 }, { unique: true });
 
 module.exports = mongoose.model('Certificate', CertificateSchema);

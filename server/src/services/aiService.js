@@ -27,8 +27,8 @@ class AiService {
    * @param {string}   [title] - Custom title for the chat.
    * @returns {Promise<ChatSession>}
    */
-  static async createSession(userId, businessIdeaId = null, title = 'AI Mentor Chat') {
-    let finalTitle = title;
+  static async createSession(userId, businessIdeaId = null, title = null) {
+    let finalTitle = (title && title.trim()) ? title.trim() : 'New Chat';
     if (businessIdeaId && mongoose.isValidObjectId(businessIdeaId)) {
       const BusinessIdea = require('../models/BusinessIdea');
       const idea = await BusinessIdea.findById(businessIdeaId).lean();

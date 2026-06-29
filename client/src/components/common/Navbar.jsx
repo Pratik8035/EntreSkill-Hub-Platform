@@ -36,6 +36,7 @@ const Navbar = () => {
 
   const userLinks = [
     { to: '/dashboard', label: 'Dashboard' },
+    { to: '/learning', label: 'Learning' },
     { to: '/recommendations', label: 'Recommendations', icon: Compass },
     { to: '/networking', label: 'Networking', icon: Network },
     { to: '/schemes', label: 'Schemes & Funding', icon: Landmark },

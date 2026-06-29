@@ -25,16 +25,18 @@ const MultiSelectSearch = ({
 
   // Derive unique categories from items
   const categories = useMemo(() => {
+    if (!Array.isArray(items)) return [];
     const cats = items.reduce((acc, cur) => {
-      if (cur.category && cur.category.name) acc.add(cur.category.name);
+      if (cur?.category?.name) acc.add(cur.category.name);
       return acc;
     }, new Set());
     return Array.from(cats);
   }, [items]);
 
   const filteredItems = useMemo(() => {
+    if (!Array.isArray(items)) return [];
     return items.filter((it) => {
-      const matchesSearch = it.name.toLowerCase().includes(search.toLowerCase());
+      const matchesSearch = it.name?.toLowerCase().includes(search.toLowerCase());
       const matchesCategory = categoryFilter ? it.category?.name === categoryFilter : true;
       return matchesSearch && matchesCategory;
     });
@@ -96,5 +98,7 @@ const MultiSelectSearch = ({
     </div>
   );
 };
+
+
 
 export default MultiSelectSearch;

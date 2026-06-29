@@ -63,6 +63,15 @@ const Dashboard = () => {
           </div>
 
           <div className="flex space-x-3 w-full md:w-auto">
+            {user.role === 'admin' && (
+              <Link
+                to="/admin"
+                className="flex-1 md:flex-none px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-sm font-bold transition-colors flex items-center justify-center space-x-1.5 shadow-md shadow-rose-600/10 cursor-pointer"
+              >
+                <Shield className="w-4 h-4" />
+                <span>Admin Control Center</span>
+              </Link>
+            )}
             <button className="flex-1 md:flex-none px-4 py-2 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-sm font-medium transition-colors flex items-center justify-center space-x-1.5 cursor-pointer">
               <Settings className="w-4 h-4" />
               <span>Settings</span>
@@ -327,7 +336,16 @@ const Dashboard = () => {
             {user.role === 'admin' && (
               <div className="space-y-6">
                 <div className="bg-white dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-4">
-                  <h3 className="font-outfit text-lg font-bold text-slate-900 dark:text-white">Platform Verification Overview</h3>
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-outfit text-lg font-bold text-slate-900 dark:text-white">Platform Verification Overview</h3>
+                    <Link
+                      to="/admin"
+                      className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 shadow-md shadow-rose-600/10 cursor-pointer"
+                    >
+                      <Shield className="w-3.5 h-3.5" />
+                      <span>Open Admin Control Center</span>
+                    </Link>
+                  </div>
                   
                   <div className="grid grid-cols-3 gap-4 text-center">
                     <div className="p-4 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-2xl">

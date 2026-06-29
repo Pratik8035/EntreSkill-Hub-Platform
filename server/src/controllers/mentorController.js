@@ -1,5 +1,6 @@
 const MentorProfile = require('../models/MentorProfile');
 const MentorRequest = require('../models/MentorRequest');
+const Connection = require('../models/Connection');
 const asyncHandler = require('express-async-handler');
 const { getMentorMatches } = require('../services/mentorMatchService');
 const { sendSuccess, sendError } = require('../utils/responseHandler');
@@ -50,4 +51,127 @@ const requestMentor = asyncHandler(async (req, res) => {
   sendSuccess(res, newRequest, 'Mentor request created');
 });
 
-module.exports = { listMentors, getRecommendedMentors, getMentorById, requestMentor };
+// @desc Get pending mentor requests for logged-in mentor
+// @route GET /api/mentors/requests/pending
+// @access Private (Mentor)
+const getPendingRequests = asyncHandler(async (req, res) => {
+  const mentorProfile = await MentorProfile.findOne({ userId: req.user._id });
+  if (!mentorProfile) {
+    return sendError(res, 'Mentor profile not found', [], 404);
+  }
+
+  const requests = await MentorRequest.find({
+    mentorId: mentorProfile._id,
+    status: 'Pending'
+  }).populate('requesterId', 'name email profile');
+
+  sendSuccess(res, requests, 'Pending mentor requests retrieved successfully');
+});
+
+// @desc Accept a mentor request
+// @route PUT /api/mentors/requests/:requestId/accept
+// @access Private (Mentor)
+const acceptRequest = asyncHandler(async (req, res) => {
+  const { requestId } = req.params;
+  const mentorProfile = await MentorProfile.findOne({ userId: req.user._id });
+  if (!mentorProfile) {
+    return sendError(res, 'Mentor profile not found', [], 404);
+  }
+
+  const request = await MentorRequest.findById(requestId);
+  if (!request) {
+    return sendError(res, 'Mentor request not found', [], 404);
+  }
+
+  if (request.mentorId.toString() !== mentorProfile._id.toString()) {
+    return sendError(res, 'Unauthorized to accept this request', [], 403);
+  }
+
+  // Accept request and create a connection
+  request.status = 'Accepted';
+  await request.save();
+
+  // Create Connection representing mentor‑entrepreneur assignment
+  const connection = await Connection.create({
+    senderId: request.requesterId,
+    receiverId: request.mentorId,
+    status: 'accepted',
+  });
+
+  sendSuccess(res, { request, connection }, 'Mentor request accepted and connection created successfully');
+});
+
+// @desc Reject a mentor request
+// @route PUT /api/mentors/requests/:requestId/reject
+// @access Private (Mentor)
+const rejectRequest = asyncHandler(async (req, res) => {
+  const { requestId } = req.params;
+  const mentorProfile = await MentorProfile.findOne({ userId: req.user._id });
+  if (!mentorProfile) {
+    return sendError(res, 'Mentor profile not found', [], 404);
+  }
+
+  const request = await MentorRequest.findById(requestId);
+  if (!request) {
+    return sendError(res, 'Mentor request not found', [], 404);
+  }
+
+  if (request.mentorId.toString() !== mentorProfile._id.toString()) {
+    return sendError(res, 'Unauthorized to reject this request', [], 403);
+  }
+
+  request.status = 'Rejected';
+  await request.save();
+
+  sendSuccess(res, request, 'Mentor request rejected successfully');
+});
+
+// @desc Get active assignments for logged-in mentor
+// @route GET /api/mentors/assignments
+// @access Private (Mentor)
+const getAssignments = asyncHandler(async (req, res) => {
+  // Mentor's active connections (accepted)
+  const connections = await Connection.find({
+    receiverId: req.user._id,
+    status: 'accepted'
+  }).populate('senderId', 'name email profile');
+
+  sendSuccess(res, connections, 'Assignments retrieved successfully');
+});
+
+// @desc Get current mentor request and assignment status for entrepreneur
+// @route GET /api/mentors/my-status
+// @access Private (Entrepreneur)
+const getEntrepreneurMentorStatus = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+
+  // Find active connection where entrepreneur is the sender
+  const connection = await Connection.findOne({
+    senderId: userId,
+    status: 'accepted'
+  }).populate('receiverId', 'name email profile');
+
+  // Find all requested mentors
+  const requests = await MentorRequest.find({
+    requesterId: userId
+  })
+  .populate({
+    path: 'mentorId',
+    populate: { path: 'userId', select: 'name email profile' }
+  });
+
+  sendSuccess(res, { connection, requests }, 'Mentor status retrieved successfully');
+});
+
+module.exports = {
+  listMentors,
+  getRecommendedMentors,
+  getMentorById,
+  requestMentor,
+  getPendingRequests,
+  acceptRequest,
+  rejectRequest,
+  getAssignments,
+  getEntrepreneurMentorStatus
+};
+

@@ -35,9 +35,12 @@ const Login = () => {
 
     setIsSubmitting(true);
     try {
-      await login(email, password);
-      // On success, redirect to dashboard
-      navigate('/dashboard');
+      const loggedInUser = await login(email, password);
+      if (loggedInUser && loggedInUser.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
       // Error is stored globally in AuthContext and will display via useAuth
       setIsSubmitting(false);
@@ -142,11 +145,18 @@ const Login = () => {
           </button>
         </form>
 
-        <div className="border-t border-slate-100 pt-4 text-center">
+        <div className="border-t border-slate-100 pt-4 text-center space-y-2">
           <p className="text-xs text-slate-500">
             Don't have an account?{' '}
             <Link to="/register" className="text-primary-600 hover:underline font-semibold">
               Create an account
+            </Link>
+          </p>
+          <p className="text-xs text-slate-400">
+            Are you a platform administrator?{' '}
+            <Link to="/admin-login" className="text-primary-600 hover:underline font-semibold flex items-center justify-center gap-1">
+              <span>Access Admin Portal</span>
+              <ArrowRight className="w-3 h-3" />
             </Link>
           </p>
         </div>

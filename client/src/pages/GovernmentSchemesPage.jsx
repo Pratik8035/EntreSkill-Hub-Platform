@@ -106,19 +106,20 @@ const GovernmentSchemesPage = () => {
     if (activeTab === 'schemes') {
       const items = viewMode === 'all' ? schemes : recommendedSchemes;
       
-      // Perform local search filtering for recommended view since recommend backend provides static list
-      const displayedItems = viewMode === 'all' 
-        ? items 
-        : items.filter(item => {
-            const matchesSearch = !search || 
-              item.scheme.name.toLowerCase().includes(search.toLowerCase()) || 
-              item.scheme.description.toLowerCase().includes(search.toLowerCase());
-            
-            const matchesCategory = category === 'All' || item.scheme.category === category;
-            const matchesState = stateFilter === 'All' || item.scheme.state === stateFilter || item.scheme.state === 'All';
-            
-            return matchesSearch && matchesCategory && matchesState;
-          });
+      const displayedItems = (() => {
+        if (viewMode === 'all') {
+          return Array.isArray(items) ? items : [];
+        }
+        if (!Array.isArray(items)) return [];
+        return items.filter(item => {
+          const matchesSearch = !search ||
+            item.scheme.name.toLowerCase().includes(search.toLowerCase()) ||
+            item.scheme.description.toLowerCase().includes(search.toLowerCase());
+          const matchesCategory = category === 'All' || item.scheme.category === category;
+          const matchesState = stateFilter === 'All' || item.scheme.state === stateFilter || item.scheme.state === 'All';
+          return matchesSearch && matchesCategory && matchesState;
+        });
+      })();
 
       if (displayedItems.length === 0) {
         return (
@@ -154,16 +155,19 @@ const GovernmentSchemesPage = () => {
     } else {
       const items = viewMode === 'all' ? funding : recommendedFunding;
       
-      const displayedItems = viewMode === 'all'
-        ? items
-        : items.filter(item => {
-            const matchesSearch = !search || 
-              item.program.name.toLowerCase().includes(search.toLowerCase()) || 
-              item.program.provider.toLowerCase().includes(search.toLowerCase());
-            
-            const matchesIndustry = industry === 'All' || item.program.industry === industry || item.program.industry === 'All';
-            return matchesSearch && matchesIndustry;
-          });
+      const displayedItems = (() => {
+        if (viewMode === 'all') {
+          return Array.isArray(items) ? items : [];
+        }
+        if (!Array.isArray(items)) return [];
+        return items.filter(item => {
+          const matchesSearch = !search ||
+            item.program.name.toLowerCase().includes(search.toLowerCase()) ||
+            item.program.provider.toLowerCase().includes(search.toLowerCase());
+          const matchesIndustry = industry === 'All' || item.program.industry === industry || item.program.industry === 'All';
+          return matchesSearch && matchesIndustry;
+        });
+      })();
 
       if (displayedItems.length === 0) {
         return (

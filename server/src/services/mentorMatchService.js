@@ -9,12 +9,13 @@ const MentorProfile = require('../models/MentorProfile');
  * Returns a numeric score between 0 and 100.
  */
 function calculateMatchScore(mentor, user) {
-  // mentor.expertise and mentor.interests are assumed to be arrays of ObjectId references.
+  // mentor.expertise and mentor.interests are arrays of strings.
   const mentorSkillIds = (mentor.expertise || []).map(id => id.toString());
   const mentorInterestIds = (mentor.interests || []).map(id => id.toString());
 
-  const userSkillIds = (user.skills || []).map(id => id.toString());
-  const userInterestIds = (user.interests || []).map(id => id.toString());
+  // User.profile.skills is [String]; User has no top-level interests field.
+  const userSkillIds = (user.profile?.skills || []).map(id => id.toString());
+  const userInterestIds = [];
 
   const skillOverlap = mentorSkillIds.filter(id => userSkillIds.includes(id)).length;
   const skillTotal = Math.max(mentorSkillIds.length, 1);
@@ -32,7 +33,7 @@ function calculateMatchScore(mentor, user) {
  * Returns array of { mentor, matchScore } sorted descending.
  */
 async function getMentorMatches(userId, limit = 10) {
-  const user = await User.findById(userId).populate('skills interests').lean();
+  const user = await User.findById(userId).lean();
   if (!user) throw new Error('User not found');
 
   const mentors = await MentorProfile.find().lean();

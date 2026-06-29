@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, Edit2, Trash2, X, Search, RefreshCw, Landmark, HelpCircle, AlertCircle, Link } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import adminService from '../../services/adminService';
-import schemeService from '../../services/schemeService';
 
 const SCHEME_CATEGORIES = ['All', 'Agriculture', 'SME Funding', 'Technology', 'Women Entrepreneurs', 'Subsidies', 'Credit Guarantee', 'Tax Schemes'];
 const STATES = ['All', 'Karnataka', 'Maharashtra', 'Delhi', 'Tamil Nadu', 'Gujarat', 'Uttar Pradesh', 'National'];
@@ -51,13 +50,13 @@ const SchemeManagement = () => {
   const fetchSchemes = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await schemeService.getSchemes({
+      const res = await adminService.getSchemes({
         search: schemeSearch,
         category: schemeCategory,
         state: schemeState
       });
       if (res.success) {
-        setSchemes(res.data || []);
+        setSchemes(res.data?.schemes || res.data || []);
       }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to fetch schemes');
@@ -69,12 +68,12 @@ const SchemeManagement = () => {
   const fetchFunding = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await schemeService.getFundingPrograms({
+      const res = await adminService.getFunding({
         search: fundSearch,
         industry: fundIndustry
       });
       if (res.success) {
-        setFunding(res.data || []);
+        setFunding(res.data?.programs || res.data || []);
       }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to fetch funding programs');
